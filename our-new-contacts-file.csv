@@ -1,0 +1,18 @@
+10,Dan,34,2548, Lovin it!,74
+20,Maria,55,5054, “Good, delicious food”,91
+30,Carlos,22,4352, “I am “”pleased””, but could be better”,197
+40,Stephany,34,6542, I want bigger steaks!!!!!,192
+41,joe smith,joe@test.com
+41,Joe Magnussen,joe@yahoo.com
+41,Linda Johnson,linda@facebook.com
+41,Howard MacGillicutty,howard@egghead.io
+41,"    puts ""Email address #{email} is already in the ContactsDatabase""",  rescue DuplicateEmailAddress
+41,"    puts ""Email address #{email} is already in the ContactsDatabase""",  rescue DuplicateEmailAddress
+41,Phil Morrison,phil@ean@.ca
+41,Alan Little,al@tellus.com,",7141234444"
+41,Rose Lee,rose@gmail.com,7145555555
+41,Sally Lim,sally@eu.ca,"12345678901234567890,3105679999"
+41,Peter Jones,peter@rr.com,"6041112222,2063335555"
+41,Bill Last,bill@wh.com,6709875555
+41,Liz Brown,liz@hotmail.com,3457778888
+41,Beverly Hills,bev@gmail.com,4445557777
