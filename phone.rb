@@ -40,17 +40,14 @@ class Phone
   def save
     if id
       # Updates a phone
-      binding.pry
       self.class.connection.exec_params('UPDATE phones SET digit = $1,  contact_id = $3 WHERE id = $4;', [digit,  contact_id, id])
     else
       # Creates a phone
       # should then store the id in the instance variable @id, for later use
       # @id = returned value
 
-      binding.pry
       res = self.class.connection.exec_params('INSERT INTO phones (digit, contact_id) VALUES ($1, $2) RETURNING id;', [digit, contact_id])
       @id = res[0]['id']
-      binding.pry
     end
   end
 
@@ -62,9 +59,7 @@ class Phone
   def destroy
     # DELETE
     # DELETE FROM phone WHERE id = 5;
-     binding.pry
      self.class.connection.exec_params('DELETE FROM phones WHERE id = $1;', [id])
-     binding.pry
   end
 
 

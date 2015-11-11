@@ -46,14 +46,11 @@ class Contact
     # UPDATE
     if id
       # Updates a contact
-      binding.pry
       self.class.connection.exec_params('UPDATE contacts SET firstname = $1, lastname = $2, email = $3 WHERE id = $4;', [firstname, lastname, email, id])
     else
       # Creates a contact
-      binding.pry
       res = self.class.connection.exec_params('INSERT INTO contacts (firstname, lastname, email) VALUES ($1, $2, $3) RETURNING id;', [firstname, lastname, email])
       @id = res[0]['id']
-      binding.pry
     end
   end
 
@@ -148,13 +145,10 @@ class Contact
     found_contacts = []
     res = connection.exec_params('SELECT * FROM contacts WHERE firstname = $1;', [firstname])
     if res != []
-      binding.pry
       res.each do |contact|
-        binding.pry
         found_contacts << Contact.new(contact['firstname'], contact['lastname'], contact['email'], contact['id'])
       end
     end
-    binding.pry
     found_contacts
 
   end

@@ -1,6 +1,5 @@
 require_relative 'contact'
 require_relative 'phone'
-require_relative 'contact_database'
 
 require 'pg'
 require 'pry'
@@ -72,8 +71,20 @@ class DuplicateEmailAddress < StandardError
 
 end
 
-# &&& recently commented
-# ContactDatabase.load_database
+def formatted_phones_for_contact(contact_id)
+  phones = Phone.find_phones_for_contact(contact_id)
+
+  formatted_phones = ''
+  phones.each do |phone|
+    if formatted_phones == ''
+      formatted_phones += "#{phone.digit}  #{phone.ph_type}"
+    else
+      formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
+    end
+  end
+
+  formatted_phones
+end
 
 
 command = ARGV[0]
@@ -178,16 +189,7 @@ when "list"
     total = 0
     contacts_array.each do |contact|
 
-      phones = Phone.find_phones_for_contact(contact.id)
-
-      formatted_phones = ''
-      phones.each do |phone|
-        if formatted_phones == ''
-          formatted_phones += "#{phone.digit}  #{phone.ph_type}"
-        else
-          formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
-        end
-      end
+      formatted_phones = formatted_phones_for_contact(contact.id)
 
       puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) #{formatted_phones}"
       total += 1
@@ -232,16 +234,7 @@ when "show"
     puts "full name: #{found_contact.firstname}"
     puts "email: #{found_contact.email}"
 
-    phones = Phone.find_phones_for_contact(contact_id)
-
-    formatted_phones = ''
-    phones.each do |phone|
-      if formatted_phones == ''
-        formatted_phones += "#{phone.digit}  #{phone.ph_type}"
-      else
-        formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
-      end
-    end
+    formatted_phones = formatted_phones_for_contact(contact_id)
 
     puts "phone numbers: #{formatted_phones}"
   else
@@ -303,16 +296,7 @@ when "find"
 
     if search_result
 
-      phones = Phone.find_phones_for_contact(contact.id)
-
-      formatted_phones = ''
-      phones.each do |phone|
-        if formatted_phones == ''
-          formatted_phones += "#{phone.digit}  #{phone.ph_type}"
-        else
-          formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
-        end
-      end
+      formatted_phones = formatted_phones_for_contact(contact.id)
 
       puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) #{formatted_phones}"
     end
