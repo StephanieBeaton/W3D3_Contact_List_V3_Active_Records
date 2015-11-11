@@ -81,5 +81,23 @@ class Phone
     Phone.new(res[0]['digit'], res[0]['ph_type'], res[0]['id'])
   end
 
+  # ===============================================
+  #
+  #  find_phones_for_contact
+  #
+  # ===============================================
+  def self.find_phones_for_contact(contact_id)
+    found_phones = []
+    res = connection.exec_params('SELECT * FROM phones WHERE contact_id = $1;', [contact_id])
+
+    if res.ntuples != 0
+      res.each do |phone|
+        found_phones << Phone.new(res[0]['digit'], res[0]['ph_type'], res[0]['id'])
+      end
+    end
+
+    found_phones
+  end
+
 
 end

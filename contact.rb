@@ -177,5 +177,31 @@ class Contact
     found_contacts
 
   end
+
+  # =======================================================================
+  # Task 6.  Prevent duplicate entries
+  #
+  # If a user tries to input the exact contact
+  # with a the same email address twice,
+  # the app should output an error saying that the contact already exists
+  # and cannot be created.
+  # If you are asking for name first and then email,
+  # for a better user experience,
+  # it may make more sense to ask for their email first and then their name.
+  # =======================================================================
+  def self.duplicate_email?(email)
+
+    duplicate_flag = false
+    contacts = Contact.find_all
+
+    contacts.each do |contact|
+      if contact.email == email
+        duplicate_flag = true
+      end
+    end
+
+    duplicate_flag
+  end
+
 end
 

@@ -119,13 +119,17 @@ when "new"
   # for a better user experience,
   # it may make more sense to ask for their email first and then their name.
 
-  # begin
+  begin
     puts "Enter email:"
     email = STDIN.gets.chomp
     # if ContactDatabase.duplicate?(email)
     #   # puts "about to raise DuplicateEmailAddress Exception"
     #   raise DuplicateEmailAddress
     # end
+    if Contact.duplicate_email?(email)
+      # puts "about to raise DuplicateEmailAddress Exception"
+      raise DuplicateEmailAddress
+    end
 
     puts "Enter first name last name:"
     full_name = ""
@@ -137,7 +141,6 @@ when "new"
     contact.save
 
     phone_number = ""
-    phone_numbers = ""
 
     begin
       puts "Enter a phone number or 'end' if no more phone numbers:"
@@ -149,23 +152,12 @@ when "new"
         phone = Phone.new(phone_number, "cell", contact.id)
         phone.save
 
-        # if phone_numbers == ""
-        #   phone_numbers += phone_number
-        # else
-        #   phone_numbers += "," + phone_number
-        # end
       end
     end until phone_number == "end"
 
-    # &&& recently commented
-    # ContactDatabase.write_new_row_to_file(contacts_to_add)
-
-
-
-
-# rescue DuplicateEmailAddress
-#     puts "Email address #{email} is already in the ContactsDatabase"
-  # end
+rescue DuplicateEmailAddress
+    puts "Email address #{email} is already in the ContactsDatabase"
+  end
 
 
 when "list"
@@ -182,16 +174,22 @@ when "list"
   # ContactDatabase.list
 
   contacts_array = Contact.find_all
-    # Example output
-    # 12: Khurram Virani (kvirani@lighthouselabs.ca)
-    # 14: Don Burks (don@lighthouselabs.ca)
-    # ---
-    # 2 records total
 
     total = 0
     contacts_array.each do |contact|
-      # puts "#{contact[0]}: #{contact[1]} (#{contact[2]}) #{contact[3]}"
-      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) "
+
+      phones = Phone.find_phones_for_contact(contact.id)
+
+      formatted_phones = ''
+      phones.each do |phone|
+        if formatted_phones == ''
+          formatted_phones += "#{phone.digit}  #{phone.ph_type}"
+        else
+          formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
+        end
+      end
+
+      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) #{formatted_phones}"
       total += 1
     end
     puts "---"
@@ -233,7 +231,19 @@ when "show"
     puts "contact id: #{found_contact.id}"
     puts "full name: #{found_contact.firstname}"
     puts "email: #{found_contact.email}"
-    # puts "phone numbers: #{found_contact[3]}"
+
+    phones = Phone.find_phones_for_contact(contact_id)
+
+    formatted_phones = ''
+    phones.each do |phone|
+      if formatted_phones == ''
+        formatted_phones += "#{phone.digit}  #{phone.ph_type}"
+      else
+        formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
+      end
+    end
+
+    puts "phone numbers: #{formatted_phones}"
   else
     puts "not found"
   end
@@ -292,7 +302,19 @@ when "find"
     end
 
     if search_result
-      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email})"
+
+      phones = Phone.find_phones_for_contact(contact.id)
+
+      formatted_phones = ''
+      phones.each do |phone|
+        if formatted_phones == ''
+          formatted_phones += "#{phone.digit}  #{phone.ph_type}"
+        else
+          formatted_phones += ", #{phone.digit}  #{phone.ph_type}"
+        end
+      end
+
+      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) #{formatted_phones}"
     end
 
   end
