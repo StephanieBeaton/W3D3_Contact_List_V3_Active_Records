@@ -1,5 +1,10 @@
 require_relative 'contact'
+require_relative 'phone'
 require_relative 'contact_database'
+
+require 'pg'
+require 'pry'
+
 # require 'csv'
 
 # TODO: Implement command line interaction
@@ -67,7 +72,8 @@ class DuplicateEmailAddress < StandardError
 
 end
 
-ContactDatabase.load_database
+# &&& recently commented
+# ContactDatabase.load_database
 
 
 command = ARGV[0]
@@ -113,18 +119,22 @@ when "new"
   # for a better user experience,
   # it may make more sense to ask for their email first and then their name.
 
-  begin
+  # begin
     puts "Enter email:"
     email = STDIN.gets.chomp
-    if ContactDatabase.duplicate?(email)
-      # puts "about to raise DuplicateEmailAddress Exception"
-      raise DuplicateEmailAddress
-    end
+    # if ContactDatabase.duplicate?(email)
+    #   # puts "about to raise DuplicateEmailAddress Exception"
+    #   raise DuplicateEmailAddress
+    # end
 
     puts "Enter first name last name:"
     full_name = ""
     full_name = STDIN.gets.chomp
 
+
+    # split full_name here
+    contact = Contact.new(full_name, "test", email)
+    contact.save
 
     phone_number = ""
     phone_numbers = ""
@@ -135,28 +145,27 @@ when "new"
       phone_number = STDIN.gets.chomp
 
       if phone_number != "end"
-        if phone_numbers == ""
-          phone_numbers += phone_number
-        else
-          phone_numbers += "," + phone_number
-        end
+
+        phone = Phone.new(phone_number, "cell", contact.id)
+        phone.save
+
+        # if phone_numbers == ""
+        #   phone_numbers += phone_number
+        # else
+        #   phone_numbers += "," + phone_number
+        # end
       end
     end until phone_number == "end"
 
-    contacts_to_add = []
+    # &&& recently commented
+    # ContactDatabase.write_new_row_to_file(contacts_to_add)
 
-    contact = []
 
-    contact << full_name
-    contact << email
-    contact << phone_numbers
-    contacts_to_add << contact
 
-    ContactDatabase.write_new_row_to_file(contacts_to_add)
 
-rescue DuplicateEmailAddress
-    puts "Email address #{email} is already in the ContactsDatabase"
-  end
+# rescue DuplicateEmailAddress
+#     puts "Email address #{email} is already in the ContactsDatabase"
+  # end
 
 
 when "list"
@@ -170,7 +179,24 @@ when "list"
   # ---
   # 2 records total
 
-  ContactDatabase.list
+  # ContactDatabase.list
+
+  contacts_array = Contact.find_all
+    # Example output
+    # 12: Khurram Virani (kvirani@lighthouselabs.ca)
+    # 14: Don Burks (don@lighthouselabs.ca)
+    # ---
+    # 2 records total
+
+    total = 0
+    contacts_array.each do |contact|
+      # puts "#{contact[0]}: #{contact[1]} (#{contact[2]}) #{contact[3]}"
+      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) "
+      total += 1
+    end
+    puts "---"
+    puts "#{total} records total"
+
 
 when "show"
   puts "command is show"
@@ -188,7 +214,32 @@ when "show"
   # display a custom "not found" message.
 
 
-  ContactDatabase.show
+  puts "Enter contact id:"
+  contact_id = STDIN.gets.chomp
+
+  found_contact = nil
+
+  # iterate thru the @@contacts_array and find contact with contact_id
+  # @@contacts_array.each do |contact|
+  #   # puts "contact ="
+  #   # puts contact
+  #   found_contact = contact if contact_id.to_i == contact[0].to_i
+  # end
+
+  found_contact = Contact.find(contact_id)
+
+  if found_contact
+    puts ""
+    puts "contact id: #{found_contact.id}"
+    puts "full name: #{found_contact.firstname}"
+    puts "email: #{found_contact.email}"
+    # puts "phone numbers: #{found_contact[3]}"
+  else
+    puts "not found"
+  end
+
+  # &&&  recently commented out
+  # ContactDatabase.show
 
 when "find"
   puts "command is find"
@@ -207,7 +258,44 @@ when "find"
 
   #  ruby contact_list.rb find ted
 
-  ContactDatabase.find(ARGV[1])
+  # ContactDatabase.find(ARGV[1])
+
+  search_term = ARGV[1]
+
+  contacts_array = Contact.find_all
+
+  contacts_array.each do |contact|
+    search_result = nil
+
+    # puts "contact = "
+    # puts contact
+
+    # search full name for sub string
+    search_result = contact.firstname.match(search_term)
+    # puts "first search_result = "
+    # puts search_result.inspect
+
+    if !search_result
+      # puts ""
+      # search email for sub string
+      search_result = contact.lastname.match(search_term)
+      # puts "second search_result = "
+      # puts search_result.inspect
+    end
+
+    if !search_result
+      # puts ""
+      # search email for sub string
+      search_result = contact.email.match(search_term)
+      # puts "third search_result = "
+      # puts search_result.inspect
+    end
+
+    if search_result
+      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email})"
+    end
+
+  end
 
 else
   puts "You gave me #{command} -- I have no idea what to do with that."
