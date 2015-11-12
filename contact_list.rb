@@ -1,10 +1,6 @@
-require_relative 'contact'
-require_relative 'phone'
 
-require 'pg'
-require 'pry'
+require_relative 'setup'
 
-# require 'csv'
 
 # TODO: Implement command line interaction
 # This should be the only file where you use puts and gets
@@ -72,7 +68,8 @@ class DuplicateEmailAddress < StandardError
 end
 
 def formatted_phones_for_contact(contact_id)
-  phones = Phone.find_phones_for_contact(contact_id)
+
+  phones = Phone.where(contact_id: contact_id)
 
   formatted_phones = ''
   phones.each do |phone|
@@ -137,19 +134,30 @@ when "new"
     #   # puts "about to raise DuplicateEmailAddress Exception"
     #   raise DuplicateEmailAddress
     # end
-    if Contact.duplicate_email?(email)
+
+    #  **** needs fixing ****
+    # if Contact.duplicate_email?(email)
+    if false
       # puts "about to raise DuplicateEmailAddress Exception"
       raise DuplicateEmailAddress
     end
 
-    puts "Enter first name last name:"
-    full_name = ""
-    full_name = STDIN.gets.chomp
+    puts "Enter first name:"
+    first_name = ""
+    first_name = STDIN.gets.chomp
+
+    puts "Enter last name:"
+    last_name = ""
+    last_name = STDIN.gets.chomp
 
 
-    # split full_name here
-    contact = Contact.new(full_name, "test", email)
-    contact.save
+    contact = Contact.create(firstname: first_name, lastname: last_name, email: email)
+
+    if !contact.id
+      contact.errors.messages.each do |key, value|
+         puts "#{key} #{value[0]}"
+      end
+    end
 
     phone_number = ""
 
@@ -160,8 +168,13 @@ when "new"
 
       if phone_number != "end"
 
-        phone = Phone.new(phone_number, "cell", contact.id)
-        phone.save
+        phone = contact.phones.create(digit: phone_number, ph_type: 'cell')
+
+        if !phone.id
+          phone.errors.messages.each do |key, value|
+             puts "#{key} #{value[0]}"
+          end
+        end
 
       end
     end until phone_number == "end"
@@ -184,18 +197,24 @@ when "list"
 
   # ContactDatabase.list
 
-  contacts_array = Contact.find_all
+  contacts_array = Contact.all
 
-    total = 0
-    contacts_array.each do |contact|
-
-      formatted_phones = formatted_phones_for_contact(contact.id)
-
-      puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) #{formatted_phones}"
-      total += 1
+  if contacts_array.length > 0 && contacts_array[0].id
+    contacts_array[0].errors.messages.each do |key, value|
+       puts "#{key} #{value[0]}"
     end
-    puts "---"
-    puts "#{total} records total"
+  end
+
+  total = 0
+  contacts_array.each do |contact|
+
+    formatted_phones = formatted_phones_for_contact(contact.id)
+
+    puts "#{contact.id}: #{contact.firstname} #{contact.lastname} (#{contact.email}) #{formatted_phones}"
+    total += 1
+  end
+  puts "---"
+  puts "#{total} records total"
 
 
 when "show"
@@ -265,7 +284,7 @@ when "find"
 
   search_term = ARGV[1]
 
-  contacts_array = Contact.find_all
+  contacts_array = Contact.all
 
   contacts_array.each do |contact|
     search_result = nil
